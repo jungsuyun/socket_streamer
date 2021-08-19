@@ -6,7 +6,7 @@ import struct
 if __name__ == '__main__':
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host_name = socket.gethostname()
-    host_ip = '192.168.0.24'
+    host_ip = '192.168.0.2'
 
     print("HOST IP : ", host_ip)
     port = 5050
@@ -30,4 +30,4 @@ if __name__ == '__main__':
                     message = struct.pack("Q", len(a)) + a
                     client_socket.sendall(message)
                 except Exception as e:
-                    pass
+                    server_socket.close()
