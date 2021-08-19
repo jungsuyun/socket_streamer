@@ -24,10 +24,10 @@ if __name__ == '__main__':
         if client_socket:
             vid = cv2.VideoCapture(0)
             while vid.isOpened():
-                img, frame = vid.read()
-                a = pickle.dumps(frame)
-                message = struct.pack("Q", len(a)) + a
-                client_socket.sendall(message)
-                if cv2.waitKey(1) == ord('q'):
-                    client_socket.close()
-                    break
+                try:
+                    img, frame = vid.read()
+                    a = pickle.dumps(frame)
+                    message = struct.pack("Q", len(a)) + a
+                    client_socket.sendall(message)
+                except Exception as e:
+                    pass

@@ -5,7 +5,7 @@ import struct
 
 if __name__ == '__main__':
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host_ip = '192.168.0.24'
+    host_ip = '192.168.0.2'
     port = 5050
 
     client_socket.connect((host_ip, port))
@@ -30,7 +30,8 @@ if __name__ == '__main__':
         data = data[msg_size:]
         frame = pickle.loads(frame_data)
         cv2.imshow("Received", frame)
-        key =  cv2.waitKey(1) & 0xFF
+        key = cv2.waitKey(1) & 0xFF
+        print(key)
         if key == ord('q'):
             break
 
