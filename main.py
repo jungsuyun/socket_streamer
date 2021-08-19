@@ -1,36 +1,80 @@
-import os, glob
-import os.path
-from flask import Flask, Response
+from queue import Queue
+from typing import Any
+import numpy as np
+
+from flask import Flask, render_template, Response, jsonify
+import cv2
+import threading
+import queue
+
+global te
+te = []
+
+
+class VideoThread:
+    def __init__(self):
+        self.capture = cv2.VideoCapture(0)
+        self.frame = None
+        self.my_thread = threading.Thread(target=self.capture_thread)
+        self.my_thread.start()
+        self.lock = threading.Lock()
+
+    def capture_thread(self):
+        if self.capture.isOpened():
+            while True:
+                global te
+                ret, frame = self.capture.read()
+                if ret:
+                    te.append(frame)
+                    print(len(te))
+                    # q.put(frame)
+                    # print(type(frame), q.qsize())
+
+    def get_frame(self):
+        if self.frame is not None:
+            return self.frame
+        else:
+            print("NONE!!")
+
+
+q = queue.Queue()
+video = VideoThread()
 
 app = Flask(__name__)
-app.config.from_object(__name__)
-jpserver_path = '/home/jungsu/.local/share/jupyter/runtime/*.html'
 
-def root_dir():  # pragma: no cover
-    return os.path.abspath(os.path.dirname(__file__))
-
-def get_file(filename):  # pragma: no cover
-    try:
-        src = os.path.join(root_dir(), filename)
-        # Figure out how flask returns static files
-        # Tried:
-        # - render_template
-        # - send_file
-        # This should not be so non-obvious
-        return open(src).read()
-    except IOError as exc:
-        return str(exc)
-
-def html_file():
-    files = glob.glob(jpserver_path)
-    files.sort(key=os.path.getmtime, reverse=True)
-    return files[0]
 
 @app.route('/')
 def index():
-    print(html_file())
-    content = get_file(html_file())
-    return Response(content)
+    return "Hello World"
 
-if __name__ == '__main__':  # pragma: no cover
-    app.run(host='192.168.0.107', port=5000)
+
+@app.route('/test')
+def get_camera():
+    capture = cv2.VideoCapture(0)
+    ret, buffer = capture.read()
+    if ret:
+        frame = cv2.imencode('.jpg', buffer)[1].tobytes()
+        print(buffer.shape)
+        return frame
+
+
+@app.route('/test2')
+def get_camera2():
+    global te
+    video.lock.acquire()
+    print(len(te), type(te))
+    video.lock.release()
+    return str(len(te))
+
+
+#     print(type(video.get_frame()))
+#     return str(video.get_frame())
+
+
+@app.route('/hi')
+def speed_test():
+    return "hello"
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host='192.168.0.30', threaded=True)
